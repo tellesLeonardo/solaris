@@ -13,14 +13,10 @@ AppDataSource.initialize().then(async () => {
 
   app.use(routes);
 
-  // Rotas de exemplo
-  app.get('/', (req: Request, res: Response) => {
-    res.send('Hello, wor213ld!');
-  });
-
-
   app.listen(port, () => {
     console.log(`Server is running at http://localhost:${port}`);
   });
 
 }).catch(error => console.log(error));
+
+export {app}
