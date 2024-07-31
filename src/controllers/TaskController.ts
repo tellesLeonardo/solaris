@@ -4,38 +4,42 @@ import { TaskService } from "../services/TaskService";
 const taskService = new TaskService();
 
 export const createTask = async (request: Request, response: Response) => {
-    const { title, description, todoId } = request.body;
-    const result = await taskService.createTask(title, description, todoId);
-  
-    if(result instanceof Error){
-        response.status(400).json({ message: result.message }); 
-    }
+  const { title, description, todoId } = request.body;
+  const result = await taskService.createTask(title, description, todoId);
 
-    response.status(201).send(result);
+  if (result instanceof Error) {
+    response.status(400).json({ message: result.message });
+  }
+
+  response.status(201).send(result);
 };
 
 export const getTasks = async (request: Request, response: Response) => {
-    const { todoId } = request.params;
-    const result = await taskService.getTasks(Number(todoId));
-    
-    if(result instanceof Error){
-        response.status(400).json({ message: result.message }); 
-    }
+  const { todoId } = request.params;
+  const result = await taskService.getTasks(Number(todoId));
 
-    response.status(200).send(result);
+  if (result instanceof Error) {
+    response.status(400).json({ message: result.message });
+  }
+
+  response.status(200).send(result);
 };
 
 export const updateTask = async (request: Request, response: Response) => {
+  const { id } = request.params;
+  const { title, description, completed } = request.body;
+  const result = await taskService.updateTask(
+    Number(id),
+    title,
+    description,
+    completed
+  );
 
-    const { id } = request.params;
-    const { title, description, completed } = request.body;
-    const result = await taskService.updateTask(Number(id), title, description, completed);
+  if (result instanceof Error) {
+    response.status(400).json({ message: result.message });
+  }
 
-    if(result instanceof Error){
-        response.status(400).json({ message: result.message }); 
-    }
-
-    response.status(200).send(result);
+  response.status(200).send(result);
 };
 
 export const deleteTask = async (request: Request, response: Response) => {

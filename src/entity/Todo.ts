@@ -1,6 +1,13 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
-import { User } from './User';
-import { Task } from './Task';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  OneToMany,
+  JoinColumn,
+} from "typeorm";
+import { User } from "./User";
+import { Task } from "./Task";
 
 @Entity("todos")
 export class Todo {
@@ -15,7 +22,7 @@ export class Todo {
 
   @Column({ default: true })
   active!: boolean;
-    
+
   @ManyToOne(() => User, (user) => user.todos)
   @JoinColumn({ name: "userId" })
   user!: User;

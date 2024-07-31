@@ -1,8 +1,12 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
-export const authenticateJWT = (request: Request, response: Response, next: NextFunction) => {
-  const token = request.header('Authorization')?.split(' ')[1];
+export const authenticateJWT = (
+  request: Request,
+  response: Response,
+  next: NextFunction
+) => {
+  const token = request.header("Authorization")?.split(" ")[1];
 
   if (token) {
     jwt.verify(token, process.env.JWT_SECRET!, (err, user) => {

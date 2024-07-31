@@ -2,9 +2,11 @@
 
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
-    username VARCHAR(255) UNIQUE NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
-    plan CHAR(1) NOT NULL
+    plan CHAR(1) NOT NULL,
+    stripeCustomerId VARCHAR(255),
+    stripeSubscriptionId VARCHAR(255)
 );
 
 -- Plan vai ter apenas 1 char que siginifca  | F - free | P - pro | D - deluxe

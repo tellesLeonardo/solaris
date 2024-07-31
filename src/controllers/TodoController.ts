@@ -4,38 +4,43 @@ import { TodoService } from "../services/TodoService";
 const todoService = new TodoService();
 
 export const createTodo = async (request: Request, response: Response) => {
-    const { title, description } = request.body;
-    const userId = request.user.id;
-    const result = await todoService.createTodo(title, description, userId);
-    
-    if(result instanceof Error){
-        response.status(400).json({ message: result.message }); 
-    }
+  const { title, description } = request.body;
+  const userId = request.user.id;
+  const result = await todoService.createTodo(title, description, userId);
 
-    response.status(201).send(result);
+  if (result instanceof Error) {
+    response.status(400).json({ message: result.message });
+  }
+
+  response.status(201).send(result);
 };
 
 export const getTodos = async (request: Request, response: Response) => {
-    const userId = request.user.id;
-    const result = await todoService.getTodos(userId);
-    
-    if(result instanceof Error){
-        response.status(400).json({ message: result.message }); 
-    }
+  const userId = request.user.id;
+  const result = await todoService.getTodos(userId);
 
-    response.status(200).send(result);
+  if (result instanceof Error) {
+    response.status(400).json({ message: result.message });
+  }
+
+  response.status(200).send(result);
 };
 
 export const updateTodo = async (request: Request, response: Response) => {
-    const { id } = request.params;
-    const { title, description, active} = request.body;
-    const result = await todoService.updateTodo(Number(id), title, description, active);
+  const { id } = request.params;
+  const { title, description, active } = request.body;
+  const result = await todoService.updateTodo(
+    Number(id),
+    title,
+    description,
+    active
+  );
 
-    if(result instanceof Error){
-        response.status(400).json({ message: result.message }); 
-    }
+  if (result instanceof Error) {
+    response.status(400).json({ message: result.message });
+  }
 
-    response.status(200).send(result);
+  response.status(200).send(result);
 };
 
 export const deleteTodo = async (request: Request, response: Response) => {

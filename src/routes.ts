@@ -1,8 +1,19 @@
 import { Router } from "express";
-import { signUp, signIn, updateUser  } from "./controllers/UserController";
-import { createTodo, getTodos, updateTodo, deleteTodo } from "./controllers/TodoController";
-import { createTask, getTasks,updateTask, deleteTask} from "./controllers/TaskController";
-import {authenticateJWT} from "./middlewares/auth.middleware"
+import { signUp, signIn, updateUser} from "./controllers/UserController";
+import {
+  createTodo,
+  getTodos,
+  updateTodo,
+  deleteTodo,
+} from "./controllers/TodoController";
+import {
+  createTask,
+  getTasks,
+  updateTask,
+  deleteTask,
+} from "./controllers/TaskController";
+import { authenticateJWT } from "./middlewares/AuthMiddleware";
+import { cancelSubscription } from "./controllers/CancelController";
 
 const routes = Router();
 
@@ -23,4 +34,7 @@ routes.get("/tasks/:todoId", authenticateJWT, getTasks);
 routes.put("/tasks/:id", authenticateJWT, updateTask);
 routes.delete("/tasks/:id", authenticateJWT, deleteTask);
 
-export {routes}
+// Rota de cancelamento de assinatura
+routes.delete("/subscriptions/:userId", authenticateJWT, cancelSubscription);
+
+export { routes };
