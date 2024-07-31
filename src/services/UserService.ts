@@ -96,7 +96,7 @@ export class UserService {
     if (password) user.password = await bcrypt.hash(password, 10);
     if (plan) {
       const upperPlan = plan.toUpperCase();
-      let stripeSubscriptionId = user.stripeSubscriptionId;
+      let stripeSubscriptionId = user.stripeSubscriptionId ?? "";
 
       if (!DicProductStrip.plans.includes(upperPlan)) {
         return new Error(

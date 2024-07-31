@@ -12,7 +12,8 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-
+    networks:
+      - todo-network
   app:
     container_name: solaris
     build:
@@ -24,27 +25,24 @@ services:
       - .:/usr/src/app
     working_dir: /usr/src/app
     environment:
-      - NODE_ENV=development
-      - UID=${UID}
-      - GID=${GID}
-      - TYPEORM_CONNECTION=${TYPEORM_CONNECTION}
-      - TYPEORM_HOST=${TYPEORM_HOST}
-      - TYPEORM_USERNAME=${TYPEORM_USERNAME}
-      - TYPEORM_PASSWORD=${TYPEORM_PASSWORD}
-      - TYPEORM_DATABASE=${TYPEORM_DATABASE}
-      - TYPEORM_PORT=${TYPEORM_PORT}
-      - TYPEORM_ENTITIES=${TYPEORM_ENTITIES}
-      - TYPEORM_ENTITIES_DIR=${TYPEORM_ENTITIES_DIR}
-      - TYPEORM_SUBSCRIBERS=${TYPEORM_SUBSCRIBERS}
-      - TYPEORM_SUBSCRIBERS_DIR=${TYPEORM_SUBSCRIBERS_DIR}
-    user: node
+      NODE_ENV: production
+      TYPEORM_CONNECTION: postgres
+      TYPEORM_HOST: db
+      TYPEORM_USERNAME: postgres
+      TYPEORM_PASSWORD: postgres
+      TYPEORM_DATABASE: solaris_db
+      TYPEORM_PORT: 5432
+      TYPEORM_ENTITIES: dist/entity/**/*.js
+      TYPEORM_ENTITIES_DIR: dist/entity
+      JWT_SECRET: gVBnHbJLlN3hRe88JRgl4vIJHPvD5T7uc7i3WQwcGqA=
+      STRIPE_SECRET_KEY: sk_test_51PiWSSRuDuHPl5ylAagZGq15cYiSJ7LsUyAjakm0FIfTtJ7HrRqJwdoed7Eh117B5evp2qnIxgngmbPueqqVwoze00KPBWXb71
     depends_on:
       - db
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: '0.5'
+    networks:
+      - todo-network
+
+networks:
+  todo-network:
 
 volumes:
   postgres_data:

@@ -33,7 +33,7 @@ export const cancelSubscription = async (
     await paymentService.cancelSubscription(user.stripeSubscriptionId);
 
     const subscription = await paymentService.createSubscription(
-      user.stripeCustomerId,
+      user.stripeCustomerId ?? "",
       getCodePlan("F")
     );
 
