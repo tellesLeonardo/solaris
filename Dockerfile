@@ -16,6 +16,8 @@ RUN npm install
 
 # Copie todo o código do projeto para o diretório de trabalho
 COPY . .
+RUN chown -R node:node /usr/src/app
+USER node
 
 # Compilar o TypeScript
 RUN npm run build

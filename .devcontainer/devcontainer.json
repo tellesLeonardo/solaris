@@ -1,6 +1,6 @@
 {
   "name": "solaris",
-  "dockerComposeFile": "../docker-compose.yml",
+  "dockerComposeFile": ["../docker-compose.yml"],
   "service": "app",
   "workspaceFolder": "/usr/src/app",
   "extensions": [
@@ -10,5 +10,7 @@
   ],
   "settings": {
     "terminal.integrated.shell.linux": "/bin/bash"
-  }
+  },
+  "remoteUser": "node",
+  "overrideCommand": false
 }
