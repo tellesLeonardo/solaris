@@ -16,9 +16,8 @@ export class UserService {
   async createUser(
     email: string,
     password: string,
-    plan: string,
-    paymentMethodId: string
-  ): Promise<User | Error> {
+    plan: string
+  ): Promise<{ user: User; url: string | null } | Error> {
     const upperPlan = plan.toUpperCase();
 
     const existsUser = await this.userRepository.findOneBy({ email });
@@ -40,19 +39,16 @@ export class UserService {
     user.password = hashedPassword;
     user.plan = upperPlan;
 
-    const customer = await paymentService.createCustomer(
-      email,
-      paymentMethodId
-    ); // aqui eu crio o cliente na stripe
-    const subscription = await paymentService.createSubscription(
-      customer.id,
-      getCodePlan(upperPlan)
-    ); // aqui eu coloco o cliente para pagar a assinatura
-
+    const customer = await paymentService.createCustomer(email); // aqui eu crio o cliente na stripe
     user.stripeCustomerId = customer.id;
-    user.stripeSubscriptionId = subscription.id;
 
-    return await this.userRepository.save(user);
+    const session = await paymentService.Checkout(
+      getCodePlan(upperPlan),
+      customer.id
+    );
+
+    let savedUser = await this.userRepository.save(user);
+    return { user: savedUser, url: session.url };
   }
 
   async authenticateUser(
@@ -83,8 +79,7 @@ export class UserService {
   async updateUser(
     id: number,
     email?: string,
-    password?: string,
-    plan?: string
+    password?: string
   ): Promise<User | Error> {
     const user = await this.userRepository.findOneBy({ id });
 
@@ -94,9 +89,24 @@ export class UserService {
 
     if (email) user.email = email;
     if (password) user.password = await bcrypt.hash(password, 10);
+
+    return await this.userRepository.save(user);
+  }
+
+  async updatePlanUser(
+    id: number,
+    plan?: string
+  ): Promise<{ user: User; url: string | null } | Error> {
+    const user = await this.userRepository.findOneBy({ id });
+
+    if (!user) {
+      return new Error("User not found");
+    }
+
     if (plan) {
       const upperPlan = plan.toUpperCase();
       let stripeSubscriptionId = user.stripeSubscriptionId ?? "";
+      let session: { url: string } | null = null;
 
       if (!DicProductStrip.plans.includes(upperPlan)) {
         return new Error(
@@ -105,18 +115,33 @@ export class UserService {
       }
 
       if (user.stripeCustomerId) {
-        await paymentService.cancelSubscription(stripeSubscriptionId); // aqui eu apago a assinatura antiga
-        const subscription = await paymentService.createSubscription(
-          user.stripeCustomerId,
-          getCodePlan(upperPlan)
-        ); // aqui eu coloco o cliente para pagar a assinatura
-        stripeSubscriptionId = subscription.id;
+        await paymentService.cancelSubscription(stripeSubscriptionId); // Cancel the old subscription
+
+        // Create a new checkout session for the new plan
+        session = await paymentService.Checkout(
+          getCodePlan(upperPlan),
+          user.stripeCustomerId
+        );
       }
 
-      user.stripeSubscriptionId = stripeSubscriptionId;
       user.plan = upperPlan;
+
+      const savedUser = await this.userRepository.save(user);
+      return { user: savedUser, url: session ? session.url : null };
     }
 
-    return await this.userRepository.save(user);
+    return { user: user, url: null };
+  }
+
+  async updateSubscription(email?: string) {
+    const user = await this.userRepository.findOneBy({ email });
+
+    const subscription = await paymentService.getSubscription(
+      user.stripeCustomerId
+    );
+
+    if (subscription) user.stripeSubscriptionId = subscription.id;
+
+    await this.userRepository.save(user);
   }
 }

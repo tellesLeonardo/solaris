@@ -27,9 +27,9 @@ export class User {
   canCreateMoreTodos(currentTodoCount: number): boolean {
     switch (this.plan) {
       case "F": // Free plan
-        return currentTodoCount <= 3;
+        return currentTodoCount < 3;
       case "P": // Pro plan
-        return currentTodoCount <= 10;
+        return currentTodoCount < 10;
       case "D": // Deluxe plan
         return true;
       default:

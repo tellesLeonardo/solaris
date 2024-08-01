@@ -7,19 +7,10 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export class PaymentService {
   // Método para criar um cliente no Stripe
-  async createCustomer(
-    email: string,
-    paymentMethodId: string
-  ): Promise<Stripe.Customer> {
+  async createCustomer(email: string): Promise<Stripe.Customer> {
     try {
       // Cria um cliente no Stripe
-      const customer = await stripe.customers.create({
-        email: email,
-        payment_method: paymentMethodId, // Associa o método de pagamento ao cliente
-        invoice_settings: {
-          default_payment_method: paymentMethodId, // Define o método de pagamento padrão para faturas
-        },
-      });
+      const customer = await stripe.customers.create({ email: email });
 
       return customer;
     } catch (error) {
@@ -66,6 +57,36 @@ export class PaymentService {
     } catch (error) {
       throw new Error(
         `Failed to cancel subscription: ${(error as Error).message}`
+      );
+    }
+  }
+
+  async Checkout(priceId: string, stripeCustomerId: string) {
+    const checkout = await stripe.checkout.sessions.create({
+      line_items: [{ price: priceId, quantity: 1 }],
+      mode: "subscription",
+      customer: stripeCustomerId,
+      success_url: "http://localhost:3000/success",
+      cancel_url: "http://localhost:3000/cancel",
+    });
+
+    return checkout;
+  }
+
+  // Método para obter a assinatura de um cliente
+  async getSubscription(
+    customerId?: string
+  ): Promise<Stripe.Subscription | null> {
+    try {
+      const subscriptions = await stripe.subscriptions.list({
+        customer: customerId,
+        limit: 1,
+      });
+
+      return subscriptions.data.length ? subscriptions.data[0] : null;
+    } catch (error) {
+      throw new Error(
+        `Failed to retrieve subscription: ${(error as Error).message}`
       );
     }
   }

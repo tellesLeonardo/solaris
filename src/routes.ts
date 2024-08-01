@@ -1,5 +1,10 @@
 import { Router } from "express";
-import { signUp, signIn, updateUser } from "./controllers/UserController";
+import {
+  signUp,
+  signIn,
+  updateUser,
+  updatePlanUser,
+} from "./controllers/UserController";
 import {
   createTodo,
   getTodos,
@@ -16,6 +21,14 @@ import { authenticateJWT } from "./middlewares/AuthMiddleware";
 import { cancelSubscription } from "./controllers/CancelController";
 
 const router = Router();
+
+router.get("/cancel", (req, res) => {
+  res.json({ message: "Payment was canceled" });
+});
+
+router.get("/success", (req, res) => {
+  res.json({ message: "Payment was successful" });
+});
 
 /**
  * @swagger
@@ -40,7 +53,6 @@ const router = Router();
  *               - email
  *               - password
  *               - plan
- *               - paymentMethodId
  *             properties:
  *               email:
  *                 type: string
@@ -48,8 +60,7 @@ const router = Router();
  *                 type: string
  *               plan:
  *                 type: string
- *               paymentMethodId:
- *                 type: string
+ *                 enum: [D, F, P]
  *     responses:
  *       201:
  *         description: Usuário criado com sucesso
@@ -69,7 +80,7 @@ const router = Router();
  *                 stripeSubscriptionId:
  *                   type: string
  *             examples:
- *               application/json: 
+ *               application/json:
  *                 value: {
  *                   "id": 1,
  *                   "username": "testuser@example.com",
@@ -80,7 +91,7 @@ const router = Router();
  *       400:
  *         description: Erro na criação do usuário
  */
-router.post('/signup', signUp);
+router.post("/signup", signUp);
 
 /**
  * @swagger
@@ -113,28 +124,21 @@ router.post('/signup', signUp);
  *                 token:
  *                   type: string
  *             examples:
- *               application/json: 
+ *               application/json:
  *                 value: {
  *                   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
  *                 }
  *       401:
  *         description: Credenciais inválidas
  */
-router.post('/signin', signIn);
+router.post("/signin", signIn);
 
 /**
  * @swagger
- * /users/{id}:
+ * /users/:
  *   put:
  *     summary: Atualizar um usuário
  *     tags: [Auth]
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: integer
- *         required: true
- *         description: ID do usuário
  *     requestBody:
  *       required: true
  *       content:
@@ -146,15 +150,44 @@ router.post('/signin', signIn);
  *                 type: string
  *               password:
  *                 type: string
- *               plan:
- *                 type: string
  *     responses:
  *       200:
  *         description: Usuário atualizado com sucesso
  *       404:
  *         description: Usuário não encontrado
  */
-router.put('/users/:id', authenticateJWT, updateUser);
+router.put("/users/", authenticateJWT, updateUser);
+
+/**
+ * @swagger
+ * /users/plan:
+ *   put:
+ *     summary: Atualizar o plano do usuário
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               plan:
+ *                 type: string
+ *                 enum: [D, F, P]
+ *     responses:
+ *       200:
+ *         description: Usuário atualizado com sucesso
+ *       404:
+ *         description: Usuário não encontrado
+ */
+router.put("/users/plan/", authenticateJWT, updatePlanUser);
+
+/**
+ * @swagger
+ * tags:
+ *   name: Todos
+ *   description: Operações de Todos
+ */
 
 /**
  * @swagger
@@ -193,7 +226,7 @@ router.put('/users/:id', authenticateJWT, updateUser);
  *                 userId:
  *                   type: integer
  *             examples:
- *               application/json: 
+ *               application/json:
  *                 value: {
  *                   "id": 1,
  *                   "title": "Novo TODO",
@@ -203,7 +236,7 @@ router.put('/users/:id', authenticateJWT, updateUser);
  *       400:
  *         description: Erro na criação do TODO
  */
-router.post('/todos', authenticateJWT, createTodo);
+router.post("/todos", authenticateJWT, createTodo);
 
 /**
  * @swagger
@@ -230,25 +263,20 @@ router.post('/todos', authenticateJWT, createTodo);
  *                   userId:
  *                     type: integer
  *             examples:
- *               application/json: 
- *                 value: [
- *                   {
- *                     "id": 1,
- *                     "title": "TODO 1",
- *                     "description": "Descrição do TODO 1",
- *                     "userId": 1
- *                   },
- *                   {
- *                     "id": 2,
- *                     "title": "TODO 2",
- *                     "description": "Descrição do TODO 2",
- *                     "userId": 1
- *                   }
- *                 ]
+ *               application/json:
+ *                 value:
+ *                   [
+ *                     {
+ *                       "id": 1,
+ *                       "title": "TODO 1",
+ *                       "description": "Descrição do TODO 1",
+ *                       "userId": 1
+ *                     }
+ *                   ]
  *       401:
  *         description: Não autorizado
  */
-router.get('/todos', authenticateJWT, getTodos);
+router.get("/todos", authenticateJWT, getTodos);
 
 /**
  * @swagger
@@ -280,8 +308,7 @@ router.get('/todos', authenticateJWT, getTodos);
  *       404:
  *         description: TODO não encontrado
  */
-router.put('/todos/:id', authenticateJWT, updateTodo);
-
+router.put("/todos/:id", authenticateJWT, updateTodo);
 
 /**
  * @swagger
@@ -302,7 +329,7 @@ router.put('/todos/:id', authenticateJWT, updateTodo);
  *       404:
  *         description: TODO não encontrado
  */
-router.delete('/todos/:id', authenticateJWT, deleteTodo);
+router.delete("/todos/:id", authenticateJWT, deleteTodo);
 
 /**
  * @swagger
@@ -350,7 +377,7 @@ router.delete('/todos/:id', authenticateJWT, deleteTodo);
  *                 todoId:
  *                   type: integer
  *             examples:
- *               application/json: 
+ *               application/json:
  *                 value: {
  *                   "id": 1,
  *                   "title": "Nova Task",
@@ -360,7 +387,7 @@ router.delete('/todos/:id', authenticateJWT, deleteTodo);
  *       400:
  *         description: Erro na criação da Task
  */
-router.post('/tasks', authenticateJWT, createTask);
+router.post("/tasks", authenticateJWT, createTask);
 
 /**
  * @swagger
@@ -394,7 +421,7 @@ router.post('/tasks', authenticateJWT, createTask);
  *                   todoId:
  *                     type: integer
  *             examples:
- *               application/json: 
+ *               application/json:
  *                 value: [
  *                   {
  *                     "id": 1,
@@ -412,7 +439,7 @@ router.post('/tasks', authenticateJWT, createTask);
  *       401:
  *         description: Não autorizado
  */
-router.get('/tasks/:todoId', authenticateJWT, getTasks);
+router.get("/tasks/:todoId", authenticateJWT, getTasks);
 
 /**
  * @swagger
@@ -444,7 +471,7 @@ router.get('/tasks/:todoId', authenticateJWT, getTasks);
  *       404:
  *         description: Task não encontrada
  */
-router.put('/tasks/:id', authenticateJWT, updateTask);
+router.put("/tasks/:id", authenticateJWT, updateTask);
 
 /**
  * @swagger
@@ -465,8 +492,7 @@ router.put('/tasks/:id', authenticateJWT, updateTask);
  *       404:
  *         description: Task não encontrada
  */
-router.delete('/tasks/:id', authenticateJWT, deleteTask);
-
+router.delete("/tasks/:id", authenticateJWT, deleteTask);
 
 /**
  * @swagger
@@ -494,6 +520,6 @@ router.delete('/tasks/:id', authenticateJWT, deleteTask);
  *       404:
  *         description: Usuário não encontrado
  */
-router.delete('/subscriptions/:userId', authenticateJWT, cancelSubscription);
+router.delete("/subscriptions/:userId", authenticateJWT, cancelSubscription);
 
 export { router };

@@ -17,14 +17,14 @@ export class TodoService {
     });
 
     if (!user) {
-      return new Error("User not found");
+      throw new Error("User not found");
     }
 
     const activeTodos = user.todos.filter((todo) => todo.active);
     const currentActiveTodoCount = activeTodos.length;
 
     if (!user.canCreateMoreTodos(currentActiveTodoCount)) {
-      return new Error(
+      throw new Error(
         `The user has exceeded the maximum limit of ALL that can be created by the plan ${user.TranslateCharPlan()}`
       );
     }

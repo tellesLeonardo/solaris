@@ -6,13 +6,13 @@ const todoService = new TodoService();
 export const createTodo = async (request: Request, response: Response) => {
   const { title, description } = request.body;
   const userId = request.user.id;
-  const result = await todoService.createTodo(title, description, userId);
 
-  if (result instanceof Error) {
-    response.status(400).json({ message: result.message });
+  try {
+    const todo = await todoService.createTodo(title, description, userId);
+    response.status(201).json(todo);
+  } catch (error) {
+    response.status(400).json({ error: (error as Error).message });
   }
-
-  response.status(201).send(result);
 };
 
 export const getTodos = async (request: Request, response: Response) => {
