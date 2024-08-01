@@ -1,0 +1,187 @@
+# Projeto TODO Backend - Solaris 
+
+## COMO RODAR O PROJETO
+
+A abordagem utilizada neste projeto envolve a criação de um backend completo para um aplicativo de gerenciamento de tarefas (TODO), utilizando TypeScript, Node.js, Express e PostgreSQL. O projeto inclui um sistema de autenticação com JWT, integração com Stripe para gerenciamento de assinaturas e operações CRUD para tarefas e subtarefas.
+
+Para executar o projeto, basta ter o Docker e Docker Compose instalados. Execute o seguinte comando na raiz do projeto:
+
+``` bash
+    docker-compose up
+```
+
+## FLUXO IDEAL DE USO DE ENTRADA
+
+1 - [Registro de Usuário](#1-/signup)
+
+2 - [Update Usuário](#2-/users/)
+
+3 - [Autenticação de Usuário](#3-/signin)
+
+4 - [ROTAS DE TODO](#4-/Todo)
+
+5 - [ROTAS DE TASKS](#5-/Task)
+
+6 - [ROTA DE Cancelamento da assinatura](#6-/subscriptions)
+
+7 - [DOCUMENTAÇÃO DA API (SWAGGER)](#7-/swagger)
+
+
+## 1. Registro de Usuário (/signup)
+
+    - O usuário se registra fornecendo um email, senha e o plano desejado (D, F ou P).
+    - Após o registro, o usuário receberá uma URL para fazer o checkout no Stripe, onde será realizada a compra do plano escolhido.
+
+
+## 2. Update Usuário (/users/ | /users/plan/) 
+
+    - o usuario pode fazer atualizações de seus dados e do seu plano
+
+### Update User 
+
+``` http
+    PUT /users
+```
+
+**Body:**
+
+``` http
+{
+    "password": "newPassword"
+}
+```
+
+### Update Plan User
+***quando fizer aatualização de plano ira vir um link para o checkout da Stripe***
+
+``` http
+    PUT /users/plan
+```
+
+**Body:**
+
+``` http
+{
+    "plan": "P"
+}
+```
+
+## 3. Autenticação de Usuário (/signup)
+
+    - O usuário se autentica com seu email e senha.
+    - Após a autenticação, o usuário receberá um token JWT.
+    - Este token deve ser usado para autenticar todas as requisições subsequentes às APIs de TODO e Tasks.
+
+***Para usar as APIs de TODO e Tasks, é necessário adicionar o token JWT no header da requisição. O formato do header deve ser:***
+``` bash
+Authorization: Bearer <token>
+``` 
+
+## 4. ROTAS DE TODO
+
+### Criar um novo TODO
+
+``` http
+    POST /todos
+```
+
+**Body:**
+
+``` http
+{
+    "title": "Novo TODO",
+    "description": "Descrição do TODO"
+}
+```
+
+### Obter todos os TODOs
+
+``` http
+    GET /todos
+```
+
+### Atualizar um TODO
+
+``` http
+    PUT /todos/{id}
+```
+
+**Body:**
+
+``` http
+{
+  "title": "Título atualizado",
+  "description": "Descrição atualizada"
+}
+```
+
+### Deletar um TODO
+a deleção optamos fazer uma soft delete mantendo o TODO, mas deixando ele inativado
+
+``` http
+    DELETE /todos/{id}
+```
+
+## 5. ROTAS DE TASKS
+
+### Criar uma nova Task
+
+``` http
+    POST /tasks
+```
+
+**Body:**
+
+``` http
+{
+  "title": "Nova Task",
+  "description": "Descrição da Task",
+  "todoId": 1
+}
+```
+
+### Obter todas as Tasks de um TODO
+
+``` http
+    GET /tasks/{todoId}
+```
+
+### Atualizar uma Task
+
+``` http
+    PUT /tasks/{id}
+```
+
+**Body:**
+
+``` http
+{
+  "title": "Título atualizado",
+  "description": "Descrição atualizada",
+  "completed": true
+}
+
+```
+
+### Deletar uma Task
+
+``` http
+    DELETE /tasks/{id}
+```
+
+## 6. ROTAS DE TASKS
+
+### Acaba com a sua assinatura na Stripe
+
+``` http
+    DELETE /subscriptions/:userId
+```
+
+## 7.DOCUMENTAÇÃO DA API (SWAGGER)
+***A documentação completa da API pode ser acessada em***
+
+``` http
+    http://localhost:3000/api-docs
+```
+
+Esta documentação fornece detalhes sobre todos os endpoints disponíveis, seus parâmetros, e exemplos de requisição e resposta.
