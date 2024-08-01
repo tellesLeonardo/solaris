@@ -104,13 +104,15 @@ export class UserService {
     }
 
     if (!plan) {
-      return {user, url: null };
+      return { user, url: null };
     }
 
     const upperPlan = plan.toUpperCase();
     if (!DicProductStrip.plans.includes(upperPlan)) {
       return new Error(
-        `Plan must be one of the following values: ${DicProductStrip.plans.join(", ")}`
+        `Plan must be one of the following values: ${DicProductStrip.plans.join(
+          ", "
+        )}`
       );
     }
 
@@ -119,8 +121,8 @@ export class UserService {
     if (user.stripeCustomerId) {
       if (user.stripeSubscriptionId) {
         await paymentService.cancelSubscription(user.stripeSubscriptionId); // Cancel the old subscription
-      };
-    
+      }
+
       const checkoutSession = await paymentService.Checkout(
         getCodePlan(upperPlan),
         user.stripeCustomerId
@@ -131,19 +133,18 @@ export class UserService {
       } else {
         session = { url: "" }; // Defina um valor padrão ou lide com a ausência da URL
       }
-    };
+    }
 
     user.plan = upperPlan;
     const savedUser = await this.userRepository.save(user);
 
     return { user: savedUser, url: session ? session.url : null };
-
   }
 
   async updateSubscription(email?: string) {
     const user = await this.userRepository.findOneBy({ email });
 
-    if (!user){
+    if (!user) {
       return new Error("User not found");
     }
 
